@@ -37,8 +37,8 @@ function initCanvasScene(){
     // canvasCamera.rotation.x = Math.PI/2;//test
 
 	cubeTex = THREE.ImageUtils.loadTexture("../img/test.png")
-	canvasGeometry = new THREE.CubeGeometry(50,50,50);
-    // canvasGeometry = new THREE.TorusGeometry( 50, 10, 16, 100 );
+	// canvasGeometry = new THREE.CubeGeometry(50,50,50);
+    canvasGeometry = new THREE.TorusGeometry( 50, 10, 16, 100 );
 
 	canvasMaterial = new THREE.MeshBasicMaterial({color: 0x000000 });
 
@@ -59,9 +59,9 @@ function canvasAnimate(){
 	// console.log(h);
 	canvasMesh.material.color.setHSL((Math.sin(Date.now()*0.0005)*0.5 + 0.5), 1.0, 0.5 );
 	// canvasMaterial.color = new THREE.Color();
-	canvasMesh.rotation.x = Date.now()*0.006;
-	canvasMesh.rotation.y = Date.now()*0.006;
-	canvasMesh.rotation.z = Date.now()*0.006;
+	// canvasMesh.rotation.x = Date.now()*0.006;
+	// canvasMesh.rotation.y = Date.now()*0.006;
+	// canvasMesh.rotation.z = Date.now()*0.006;
 	// canvasMesh.position.x = (w/2 - 50)*Math.sin(time);
 	// canvasMesh.position.z = (h/3)*Math.cos(time);
 	// canvasMesh.position.y = (h/3)*Math.sin(time);
@@ -234,7 +234,23 @@ function initFrameDifferencing(){
 	meshFB2 = new THREE.Mesh(planeGeometry, materialFB2);
 	sceneFB2.add(meshFB2);
 
-	material = new THREE.MeshBasicMaterial({map: rtFB2});
+	sceneFB3 = new THREE.Scene();
+	rtFB3 = new THREE.WebGLRenderTarget(w, h, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+	materialFB3 = new THREE.ShaderMaterial({
+		uniforms: {
+			time: { type: 'f' , value: time},
+			resolution: {type: 'v2', value: new THREE.Vector2(w,h)},
+			texture: {type: 't', value: rtFB2},
+			mouseX: {type: 'f', value: mouseX},
+			mouseY: {type: 'f', value: mouseY}
+		},
+		vertexShader: document.getElementById("vs").textContent,
+		fragmentShader: document.getElementById("colorFs").textContent
+	});
+	meshFB3 = new THREE.Mesh(planeGeometry, materialFB3);
+	sceneFB3.add(meshFB3);
+
+	material = new THREE.MeshBasicMaterial({map: rtFB3});
 	mesh = new THREE.Mesh(planeGeometry, material);
 	scene.add(mesh);
 
@@ -275,6 +291,7 @@ function draw(){
 
 	renderer.render(sceneFB, cameraRTT, rtFB, true);
 	renderer.render(sceneFB2, cameraRTT, rtFB2, true);
+	renderer.render(sceneFB3, cameraRTT, rtFB3, true);
 
 	renderer.render(scene, camera);
 
@@ -309,7 +326,7 @@ function onKeyDown( event ){
 	if( event.keyCode == "32"){
 		screenshot();
 		
-function screenshot(){
+	function screenshot(){
 	// var i = renderer.domElement.toDataURL('image/png');
 	var blob = dataURItoBlob(renderer.domElement.toDataURL('image/png'));
 	var file = window.URL.createObjectURL(blob);
@@ -347,60 +364,4 @@ function screenshot(){
 		    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 		}
 	}
-}
-/**
- * Converts an RGB color value to HSL. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and l in the set [0, 1].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSL representation
- */
-function rgbToHsl(r, g, b){
-    r /= 255, g /= 255, b /= 255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
-
-    if(max == min){
-        h = s = 0; // achromatic
-    }else{
-        var d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-
-    return [h, s, l];
-}
-
-function hslToRgb(h, s, l){
-    var r, g, b;
-
-    if(s == 0){
-        r = g = b = l; // achromatic
-    }else{
-        var hue2rgb = function hue2rgb(p, q, t){
-            if(t < 0) t += 1;
-            if(t > 1) t -= 1;
-            if(t < 1/6) return p + (q - p) * 6 * t;
-            if(t < 1/2) return q;
-            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-            return p;
-        }
-
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1/3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
-    }
-
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
