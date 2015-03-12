@@ -14,62 +14,22 @@ var planeGeometry;
 var mesh1, mesh2;
 var mouseX, mouseY;
 var time = 0.0;
-initCanvasScene();
-function initCanvasScene(){
-	canvasCamera = new THREE.PerspectiveCamera(50, w / h, 1, 100000);
-    canvasCamera.position.set(0,0, 750);//test
+cinitScene();
 
-	canvasControls = new THREE.OrbitControls(canvasCamera);
-	canvasRenderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true});
-	canvasRenderer.setSize(w,h);
-	canvasRenderer.setClearColor(0xffffff, 1);
-    // canvasRenderer.autoClearColor = false;
-
-	// container = document.createElement('div');
-
-    // document.body.appendChild(container);
-
-    // container.appendChild(canvasRenderer.domElement);
-
-
-	canvasScene = new THREE.Scene();
-	// canvasCamera.lookAt( canvasScene.position )
-    // canvasCamera.rotation.x = Math.PI/2;//test
-
-	cubeTex = THREE.ImageUtils.loadTexture("../img/test.png")
-	canvasGeometry = new THREE.CubeGeometry(50,50,50);
-    // canvasGeometry = new THREE.TorusGeometry( 50, 10, 16, 100 );
-
-	canvasMaterial = new THREE.MeshBasicMaterial({color: 0x000000 });
-
-	canvasLight = new THREE.DirectionalLight(0xffffff, 1.0);
-	canvasLight.position.set(0,0,100);
-	canvasScene.add(canvasLight);
-	canvasMesh = new THREE.Mesh(canvasGeometry, canvasMaterial);
-	canvasMesh.position.set(0,h/3 - 50,0);
-	canvasScene.add(canvasMesh);
-	canvasAnimate();
-	initScene();
-
-}
 function canvasAnimate(){
 	window.requestAnimationFrame(canvasAnimate);
+	ccamera.lookAt(cscene.position);
+    ccameraCube.rotation.copy(ccamera.rotation);
+    for (var i = 0; i < shards.length; i++) {
+        shards[i].rotation.x = Date.now() * 0.00008; //+(mouseX/(mouseY*10.0));
+        shards[i].rotation.y += (targetRotationX - shards[i].rotation.y) * 0.1;
+        // shards[i].rotation.z = Date.now()*0.00003;
+        shards[i].rotation.z += (targetRotationY - shards[i].rotation.z) * 0.1;
+    }
 
-	// h = ( 360 * ( 1.0 + Date.now()*0.005 ) % 360 ) / 360;
-	// console.log(h);
-	canvasMesh.material.color.setHSL((Math.sin(Date.now()*0.0005)*0.5 + 0.5), 1.0, 0.5 );
-	// canvasMaterial.color = new THREE.Color();
-	// canvasMesh.rotation.x = Date.now()*0.006;
-	// canvasMesh.rotation.y = Date.now()*0.006;
-	// canvasMesh.rotation.z = Date.now()*0.006;
-	canvasMesh.position.x = (w/2 - 50)*Math.sin(time);
-	canvasMesh.position.z = (h/3)*Math.cos(time);
-	// canvasMesh.position.y = (h/3)*Math.sin(time);
-		// canvasRenderer.setClearColor(new THREE.Color().setHSL((Math.cos(time)*0.5 + 0.5), 1.0, 0.5))
 
-	// canvasMesh.position.z = 1000*Math.cos(time);
-
-	canvasRenderer.render(canvasScene, canvasCamera);
+    // renderer.render(sceneCube, cameraCube);
+    crenderer.render(cscene, ccamera);
 }
 function initScene(){
 	container = document.createElement('div');
@@ -95,7 +55,7 @@ function initScene(){
 	document.addEventListener( 'keydown', onKeyDown, false );
 
     document.addEventListener('mousemove', onDocumentMouseMove, false);
-    // document.addEventListener('mousedown', onDocumentMouseDown, false);
+    document.addEventListener('mousedown', onDocumentMouseDown, false);
 
     animate();
 }
@@ -119,35 +79,14 @@ function initCanvasTex(){
 	image.onload = function (){
 		ctx.drawImage(image, 0, 0);
 	}
-	image.src = "../img/b-w2.jpg";
+	// image.src = "../img/b-w2.jpg";
 
-    tex = new THREE.Texture(canvasRenderer.domElement);
+    tex = new THREE.Texture(crenderer.domElement);
     tex.needsUpdate = true;
     camTex = tex;
     initFrameDifferencing();
 
 
-}
-function initCameraTex(){
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
-    if (navigator.getUserMedia) {       
-        navigator.getUserMedia({video: true, audio: false}, function(stream){
-        	var url = window.URL || window.webkitURL;
-			video = document.createElement("video");
-	        video.src = url ? url.createObjectURL(stream) : stream;
-	        // video.src = "satin.mp4";
-	        // video.loop = true;
-	        // video.playbackRate = 0.25;
-	        video.play();
-	        videoLoaded = true;
-	        tex = new THREE.Texture(video);
-	        tex.needsUpdate = true;
-	        camTex = tex;
-	        initFrameDifferencing();
-        }, function(error){
-		   console.log("Failed to get a stream due to", error);
-	    });
-	}
 }
 
 function initFrameDifferencing(){
@@ -164,7 +103,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("blurFrag").textContent
+		fragmentShader: document.getElementById("colorFs").textContent
 	});
 	mesh1 = new THREE.Mesh(planeGeometry, material1);
 	mesh1.position.set(0, 0, 0);
@@ -180,7 +119,7 @@ function initFrameDifferencing(){
 			texture2: {type: 't', value: camTex}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fbFs").textContent
+		fragmentShader: document.getElementById("blurFrag").textContent
 	});
 	mesh2 = new THREE.Mesh(planeGeometry, material2);
 	mesh2.position.set(0, 0, 0);
@@ -213,7 +152,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fs").textContent
+		fragmentShader: document.getElementById("colorFs").textContent
 	});
 	meshFB = new THREE.Mesh(planeGeometry, materialFB);
 	sceneFB.add(meshFB);
@@ -229,12 +168,28 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("chromaFs").textContent
+		fragmentShader: document.getElementById("sharpenFrag").textContent
 	});
 	meshFB2 = new THREE.Mesh(planeGeometry, materialFB2);
 	sceneFB2.add(meshFB2);
 
-	material = new THREE.MeshBasicMaterial({map: rtFB2});
+	sceneFB3 = new THREE.Scene();
+	rtFB3 = new THREE.WebGLRenderTarget(w, h, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+	materialFB3 = new THREE.ShaderMaterial({
+		uniforms: {
+			time: { type: 'f' , value: time},
+			resolution: {type: 'v2', value: new THREE.Vector2(w,h)},
+			texture: {type: 't', value: rtFB2},
+			mouseX: {type: 'f', value: mouseX},
+			mouseY: {type: 'f', value: mouseY}
+		},
+		vertexShader: document.getElementById("vs").textContent,
+		fragmentShader: document.getElementById("colorFs").textContent
+	});
+	meshFB3 = new THREE.Mesh(planeGeometry, materialFB3);
+	sceneFB3.add(meshFB3);
+
+	material = new THREE.MeshBasicMaterial({map: rtFB3});
 	mesh = new THREE.Mesh(planeGeometry, material);
 	scene.add(mesh);
 
@@ -243,25 +198,10 @@ function animate(){
 	window.requestAnimationFrame(animate);
 	draw();
 }
-function canvasDraw(){
-	var randW = Math.random()*(w-sliceSize);
-	var randH = Math.random()*(h-sliceSize);
-	var randPart = ctx.getImageData(randW, randH, sliceSize, sliceSize);
-	var randData = randPart.data;
-	var newRandW = Math.random()*w;
-	var newRandH = Math.random()*h;
-	// if(newRandW > w + 10){
-	// 	newRandW = w/2;
-	// }
-	// if(newRandH > h + 10){
-	// 	newRandH = h/2;
-	// }
 
-	ctx.putImageData(randPart, newRandW, newRandH );
-}
 function draw(){
 	time+=0.05;
-	canvasDraw();
+	// canvasDraw();
     camTex.needsUpdate = true;
 
     // expand(1.01);
@@ -275,6 +215,7 @@ function draw(){
 
 	renderer.render(sceneFB, cameraRTT, rtFB, true);
 	renderer.render(sceneFB2, cameraRTT, rtFB2, true);
+	renderer.render(sceneFB3, cameraRTT, rtFB3, true);
 
 	renderer.render(scene, camera);
 
@@ -304,6 +245,12 @@ function onDocumentMouseMove(event){
     material1.uniforms.mouseX.value = mouseX;
     materialFB2.uniforms.mouseY.value = mouseY;
     material1.uniforms.mouseY.value = mouseY;
+
+    cmouseX = event.clientX - windowHalfX;
+    cmouseY = event.clientY + windowHalfY;
+
+    targetRotationY = targetRotationOnMouseDownY + (cmouseY - mouseYOnMouseDown) * 0.001;
+    targetRotationX = targetRotationOnMouseDownX + (cmouseX - mouseXOnMouseDown) * 0.001;
 }
 function onKeyDown( event ){
 	if( event.keyCode == "32"){
@@ -347,60 +294,4 @@ function screenshot(){
 		    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 		}
 	}
-}
-/**
- * Converts an RGB color value to HSL. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and l in the set [0, 1].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSL representation
- */
-function rgbToHsl(r, g, b){
-    r /= 255, g /= 255, b /= 255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
-
-    if(max == min){
-        h = s = 0; // achromatic
-    }else{
-        var d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-
-    return [h, s, l];
-}
-
-function hslToRgb(h, s, l){
-    var r, g, b;
-
-    if(s == 0){
-        r = g = b = l; // achromatic
-    }else{
-        var hue2rgb = function hue2rgb(p, q, t){
-            if(t < 0) t += 1;
-            if(t > 1) t -= 1;
-            if(t < 1/6) return p + (q - p) * 6 * t;
-            if(t < 1/2) return q;
-            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-            return p;
-        }
-
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1/3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
-    }
-
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }

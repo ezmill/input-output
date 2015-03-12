@@ -17,7 +17,7 @@ var time = 0.0;
 initCanvasScene();
 function initCanvasScene(){
 	canvasCamera = new THREE.PerspectiveCamera(50, w / h, 1, 100000);
-    canvasCamera.position.set(0,0, 750);//test
+    canvasCamera.position.set(0,0, 200);//test
 
 	canvasControls = new THREE.OrbitControls(canvasCamera);
 	canvasRenderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true});
@@ -37,10 +37,10 @@ function initCanvasScene(){
     // canvasCamera.rotation.x = Math.PI/2;//test
 
 	cubeTex = THREE.ImageUtils.loadTexture("../img/test.png")
-	// canvasGeometry = new THREE.CubeGeometry(50,50,50);
-    canvasGeometry = new THREE.TorusGeometry( 50, 10, 16, 100 );
+	canvasGeometry = new THREE.CubeGeometry(50,50,50);
+    // canvasGeometry = new THREE.TorusGeometry( 50, 10, 16, 100 );
 
-	canvasMaterial = new THREE.MeshBasicMaterial({color: 0x000000 });
+	canvasMaterial = new THREE.MeshBasicMaterial({color: 0xff0000 });
 
 	canvasLight = new THREE.DirectionalLight(0xffffff, 1.0);
 	canvasLight.position.set(0,0,100);
@@ -57,7 +57,7 @@ function canvasAnimate(){
 
 	// h = ( 360 * ( 1.0 + Date.now()*0.005 ) % 360 ) / 360;
 	// console.log(h);
-	canvasMesh.material.color.setHSL((Math.sin(Date.now()*0.0005)*0.5 + 0.5), 1.0, 0.5 );
+	// canvasMesh.material.color.setHSL((Math.cos(Date.now()*0.0005)*0.5 + 0.5), 1.0, 0.5 );
 	// canvasMaterial.color = new THREE.Color();
 	// canvasMesh.rotation.x = Date.now()*0.006;
 	// canvasMesh.rotation.y = Date.now()*0.006;
@@ -164,7 +164,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("blurFrag").textContent
+		fragmentShader: document.getElementById("sharpenFrag").textContent
 	});
 	mesh1 = new THREE.Mesh(planeGeometry, material1);
 	mesh1.position.set(0, 0, 0);
@@ -180,7 +180,7 @@ function initFrameDifferencing(){
 			texture2: {type: 't', value: camTex}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fbFs").textContent
+		fragmentShader: document.getElementById("blurFrag").textContent
 	});
 	mesh2 = new THREE.Mesh(planeGeometry, material2);
 	mesh2.position.set(0, 0, 0);
@@ -213,7 +213,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fbFs").textContent
+		fragmentShader: document.getElementById("colorFs").textContent
 	});
 	meshFB = new THREE.Mesh(planeGeometry, materialFB);
 	sceneFB.add(meshFB);
@@ -229,7 +229,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("sharpenFrag").textContent
+		fragmentShader: document.getElementById("fbFs").textContent
 	});
 	meshFB2 = new THREE.Mesh(planeGeometry, materialFB2);
 	sceneFB2.add(meshFB2);
@@ -245,7 +245,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("colorFs").textContent
+		fragmentShader: document.getElementById("fs").textContent
 	});
 	meshFB3 = new THREE.Mesh(planeGeometry, materialFB3);
 	sceneFB3.add(meshFB3);

@@ -1,6 +1,6 @@
 var container;
-var scene, camera, renderer;
-var sceneCube, cameraCube;
+var cscene, ccamera, crenderer;
+var csceneCube, ccameraCube;
 var loader;
 var shards = [];
 var shardTextures = [];
@@ -15,43 +15,17 @@ var targetRotationX = 0;
 var targetRotationOnMouseDownX = 0;
 var targetRotationY = 0;
 var targetRotationOnMouseDownY = 0;
-var mouseX = 0;
+var cmouseX = 0;
 var mouseXOnMouseDown = 0;
-var mouseY = 0;
+var cmouseY = 0;
 var mouseYOnMouseDown = 0;
 var clickCount = 0;
 var index = 0;
-var texture;
+var ctexture;
 var images = new Array();
-
-function preload() {
-    for (i = 0; i < preload.arguments.length; i++) {
-        images[i] = new Image()
-        images[i].src = preload.arguments[i];
-    }
-}
-preload(
-    "textures/textureCube/1.jpg",
-    "textures/textureCube/2.jpg",
-    "textures/textureCube/3.jpg",
-    "textures/textureCube/4.jpg",
-    "textures/textureCube/5.jpg",
-    "textures/textureCube/6.jpg",
-    "textures/textureCube/7.jpg",
-    "textures/textureCube/8.jpg",
-    "textures/textureCube/9.jpg",
-    "textures/textureCube/10.jpg",
-    "textures/textureCube/11.jpg",
-    "textures/textureCube/12.jpg",
-    "textures/textureCube/13.jpg",
-    "textures/textureCube/14.jpg",
-    "textures/textureCube/15.jpg"
-)
-cinitScene();
-
 function cinitScene() {
-    container = document.createElement('div');
-    document.body.appendChild(container);
+    // container = document.createElement('div');
+    // document.body.appendChild(container);
     ccamera = new THREE.OrthographicCamera(w / -2, w / 2, h / 2, h / -2, 1, 100000);
     ccameraCube = new THREE.PerspectiveCamera(50, w / h, 1, 100000);
     // camera = new THREE.PerspectiveCamera(50, w / h, 1, 100000);
@@ -59,22 +33,27 @@ function cinitScene() {
     // camera.position.z = 500;
     cscene = new THREE.Scene();
 
+    canvasControls = new THREE.OrbitControls(ccamera);
+
     csceneCube = new THREE.Scene();
     crenderer = new THREE.WebGLRenderer();
     crenderer.setSize(w, h);
     crenderer.setClearColor(0xffffff, 1);
-    crenderer.autoClear = false;
+    // crenderer.autoClear = false;
     // renderer.domElement.style.width = "100%";
     // renderer.domElement.style.height = "100%";
-    container.appendChild(renderer.domElement);
+    // container.appendChild(renderer.domElement);
     //event listeners
     document.addEventListener('mousemove', onDocumentMouseMove, false);
     // document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-    document.addEventListener('touchmove', onDocumentTouchMove, false);
+    // document.addEventListener('touchmove', onDocumentTouchMove, false);
     crenderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
-    window.addEventListener('resize', onWindowResize, false);
+    // window.addEventListener('resize', onWindowResize, false);
     ctexture = cinitTexture(index);
     // animate();
+    canvasAnimate();
+    initScene();
+
 }
 
 function shardTexs() {
@@ -100,7 +79,7 @@ function SHARD_ME(texture) {
     // var material = initMaterial(index, shardTextures[index]);
 }
 
-function initTexture(index) {
+function cinitTexture(index) {
     var urls = [];
     for (var i = 0; i < 6; i++) {
         // var url = "textures/diamonds/diamond" + (index+1) + ".jpg";
@@ -164,9 +143,9 @@ function createShard(index, geometry, material) {
     // shard.position.set(200*(index%8)-600,90*(index/7)-340,-1000);
     shard.position.set((w / 8) * (index % 8) - (w / 2.25), (h / 7) * (index % 7) - (h / 2.4), -1000);
     // var scale = (1+(w/h))*2000.0;
-    var scale = 5000.0;
+    var scale = 4000.0;
     shard.scale.set(scale, scale, scale);
-    scene.add(shard);
+    cscene.add(shard);
     shards.push(shard);
 }
 
@@ -203,95 +182,4 @@ function onDocumentMouseDown() {
     // shader.uniforms[ "tCube" ].value = newTex;
 
     // texture.envMap = initTexture(index);
-}
-
-function onDocumentMouseMove(event) {
-    cmouseX = event.clientX - windowHalfX;
-    cmouseY = event.clientY + windowHalfY;
-
-    targetRotationY = targetRotationOnMouseDownY + (cmouseY - mouseYOnMouseDown) * 0.001;
-    targetRotationX = targetRotationOnMouseDownX + (cmouseX - mouseXOnMouseDown) * 0.001;
-}
-
-function onDocumentTouchStart(event) {
-    if (event.touches.length == 1) {
-
-        event.preventDefault();
-
-        mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
-        targetRotationOnMouseDownX = targetRotationX;
-
-        mouseYOnMouseDown = event.touches[0].pageY - windowHalfY;
-        targetRotationOnMouseDownY = targetRotationY;
-
-    }
-}
-
-function onDocumentTouchMove(event) {
-
-    if (event.touches.length == 1) {
-
-        event.preventDefault();
-
-        cmouseX = event.touches[0].pageX - windowHalfX;
-        targetRotationX = targetRotationOnMouseDownX + (cmouseX - mouseXOnMouseDown) * 0.001;
-
-        cmouseY = event.touches[0].pageY - windowHalfY;
-        targetRotationY = targetRotationOnMouseDownY + (cmouseY - mouseYOnMouseDown) * 0.001;
-
-    }
-
-}
-
-
-function onWindowResize() {
-
-    windowHalfX = window.innerWidth / 2,
-    windowHalfY = window.innerHeight / 2,
-
-    ccamera.aspect = window.innerWidth / window.innerHeight;
-    ccamera.updateProjectionMatrix();
-
-    ccameraCube.aspect = window.innerWidth / window.innerHeight;
-    ccameraCube.updateProjectionMatrix();
-
-    crenderer.setSize(window.innerWidth, window.innerHeight);
-
-}
-
-function easeInOutCubic(t) {
-    // return 1+(--t)*t*t*t*t;
-    return t;
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    crender();
-}
-
-function crender() {
-    ccamera.lookAt(scene.position);
-    ccameraCube.rotation.copy(camera.rotation);
-    for (var i = 0; i < shards.length; i++) {
-        shards[i].rotation.x = Date.now() * 0.00008; //+(mouseX/(mouseY*10.0));
-        shards[i].rotation.y += (targetRotationX - shards[i].rotation.y) * 0.1;
-        // shards[i].rotation.z = Date.now()*0.00003;
-        shards[i].rotation.z += (targetRotationY - shards[i].rotation.z) * 0.1;
-    }
-
-
-    // renderer.render(sceneCube, cameraCube);
-    crenderer.render(scene, camera);
-
-}
-var box = document.getElementById("box");
-var shardCounter = 0;
-
-function handleShardClick(e) {
-    if (shardCounter % 2 == 0) {
-        box.style.display = "block";
-    } else {
-        box.style.display = "none";
-    }
-    shardCounter++;
 }
