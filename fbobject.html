@@ -43,7 +43,7 @@ void main() {
   float avg = dot(tex2.rgb - tex1.rgb, vec3(1.0))/3.0;
   // fc = avg <= 0.01  ? fc : 1.0-fc;
   vec4 add = (fc + tex0);
-  gl_FragColor = fc;//mod(add,tex2.r);
+  gl_FragColor = (fc);//mod(add,tex2.r);
   // gl_FragColor = smoothstep(tex2,tex0,mod(add,tex2.r));
 }
 </script>
@@ -703,6 +703,52 @@ void main() {
    }
   gl_FragColor = vec4((sum/kernelWeight).rgb, 1.0);
 }
+</script>
+<script type="x-shader/x-fragment" id="flow2">
+ 
+    uniform vec2 resolution;
+    uniform float time;
+    uniform sampler2D texture;
+    varying vec2 vUv;
+    uniform float mouseX;
+    uniform float mouseY;
+
+    void main( void ){
+      vec2 p = gl_FragCoord.xy / resolution.xy;
+      
+      // vec2 uv = p*0.15 + 0.25;
+      vec2 uv = vUv;
+      // vec2 uv = vUv*0.05 + vec2(0.62, 0.57);
+      
+      vec2 e = 1.0/resolution.xy;
+      
+      
+      // float am1 = 0.5 + 0.5*sin( time );
+      float am1 = 0.5 + 0.5*0.927180409;
+      // float am2 = 0.5 + 0.5*cos( time );
+      float am2 = 10.0;
+      
+      for( int i=0; i<20; i++ ){
+        float h  = dot( texture2D(texture, uv,               -100.0).xyz, vec3(0.333) );
+        float h1 = dot( texture2D(texture, uv+vec2(e.x,mouseX), -100.0).xyz, vec3(0.333) );
+        float h2 = dot( texture2D(texture, uv+vec2(mouseY,e.y), -100.0).xyz, vec3(0.333) );
+            // gradient
+        vec2 g = 0.001*vec2( (h1-h), (h2-h) )/e;
+            // isoline    
+        vec2 f = g.yx*vec2(-1.0,1.0);
+        // vec2 f = g.yx*vec2(10.0*mouseX, 10.0*mouseY);
+        
+        g = mix( g, f, am1 );
+        
+        uv -= 0.0001*g*am2;
+      }
+      
+      vec3 col = texture2D(texture, uv).xyz;
+      
+        // col *= 2.0;
+        
+      gl_FragColor = vec4(col, 1.0);
+    }
 </script>
 <script src="three.min.js"></script>
 <script src="BinaryLoader.js"></script>
