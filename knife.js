@@ -45,7 +45,7 @@ function initCanvasScene(){
 		w: w,
     	h: h, 
     	x: 0,
-    	texture: "../img/clouds.jpg",
+    	texture: "img/clouds.jpg",
     	vertexShader: "vs",
     	fragmentShader1: "syrup-fs",
     	fragmentShader2: "syrup-fs-2",
@@ -167,7 +167,7 @@ function initCanvasTex(){
 	image.onload = function (){
 		ctx.drawImage(image, 0, 0);
 	}
-	image.src = "img/clouds.jpg";
+	image.src = "../img/clouds.jpg";
 
     tex = new THREE.Texture(canvasRenderer.domElement);
     // tex = new THREE.Texture(canvas);
