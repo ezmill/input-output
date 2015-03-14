@@ -1,6 +1,6 @@
 var container;
-var scene, camera, renderer;
-var sceneCube, cameraCube;
+var cscene, ccamera, crenderer;
+var csceneCube, ccameraCube;
 var loader;
 var shards = [];
 var shardTextures = [];
@@ -15,13 +15,13 @@ var targetRotationX = 0;
 var targetRotationOnMouseDownX = 0;
 var targetRotationY = 0;
 var targetRotationOnMouseDownY = 0;
-var mouseX = 0;
+var cmouseX = 0;
 var mouseXOnMouseDown = 0;
-var mouseY = 0;
+var cmouseY = 0;
 var mouseYOnMouseDown = 0;
 var clickCount = 0;
 var index = 0;
-var texture;
+var ctexture;
 var images = new Array();
 
 function preload() {
