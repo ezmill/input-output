@@ -41,7 +41,7 @@ void main() {
 
   vec4 fc = (tex2 - tex1);
   float avg = dot(tex2.rgb - tex1.rgb, vec3(1.0))/3.0;
-  // fc = avg <= 0.01  ? fc : 1.0-fc;
+  fc = avg <= 0.01  ? fc : 1.0-fc;
   vec4 add = (fc + tex0);
   gl_FragColor = (fc);//mod(add,tex2.r);
   // gl_FragColor = smoothstep(tex2,tex0,mod(add,tex2.r));
@@ -121,9 +121,9 @@ void main(){
     uniform float mouseY;
 
     void main(void) {
-      float   centerBuffer    = 0.0,
+      float   centerBuffer    = 1.0,
       vignetteStrength  = 0.0,
-      aberrationStrength  = 1.2;
+      aberrationStrength  = 3.2;
       
       float   chrDist,
       vigDist;
@@ -139,14 +139,15 @@ void main(){
       if( chrDist < 0.0 ) chrDist = 0.0;
       
       //distort the UVs
-      vec2 uvR = uv * ( 1.0 + chrDist * 0.02 * aberrationStrength ),
-      uvB = uv * ( 1.0 - chrDist * 0.02 * aberrationStrength );
+      vec2 uvR = uv * ( 1.0 + chrDist * 0.02 * aberrationStrength );
+      vec2 uvG = uv * vec2( 1.0 + chrDist * 0.02 * aberrationStrength, 1.0 - chrDist * 0.02 * aberrationStrength  );
+      vec2 uvB = uv * ( 1.0 - chrDist * 0.02 * aberrationStrength );
       
       //get the individual channels using the modified UVs
       vec4 c;
       
       c.x = texture2D( texture , uvR ).x;
-      c.y = texture2D( texture , uv ).y;
+      c.y = texture2D( texture , uvG ).y;
       c.z = texture2D( texture , uvB ).z;
       
       //apply vignette
@@ -757,6 +758,7 @@ void main() {
 <script src="Detector.js"></script>
 <script src="OrbitControls.js"></script>
 <script src="dat.gui.min.js"></script>
+<script src="js/clothFunction.js"></script>
 <script src="FBObject.js"></script>
 <script src="knife.js"></script>
 </body>

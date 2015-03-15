@@ -10,6 +10,8 @@ var FBObject = function(params){
 	this.mainScene = params.mainScene;
 	this.model;
 	this.extraTex = params.extraTex;
+	this.useVideo = params.useVideo;
+
 	//built in properties
 	this.scene1;
 	this.scene2;
@@ -62,10 +64,31 @@ var FBObject = function(params){
 		
 	// }
 
+	this.handleVideo = function(stream){
+		var url = window.URL || window.webkitURL;
+		this.video = document.createElement("video");
+        this.video.src = url ? url.createObjectURL(stream) : stream;
+        this.video.play();
+        this.videoLoaded = true;
+        var tex = new THREE.Texture(this.video);
+        tex.needsUpdate = true;
+        this.videoTexture = tex;
+		this.material1.uniforms.texture.value = this.videoTexture;
+	}
 	this.createBackgroundScene = function(){
-		if(!this.extraTex){
+		var that = this;
+		if(!this.extraTex && !this.useVideo){
 			var tex = THREE.ImageUtils.loadTexture(this.texture);
-		}  else {
+		}  else if(this.useVideo){
+	        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+            if (navigator.getUserMedia) {       
+		        navigator.getUserMedia({video: true, audio: false}, function(stream){
+		        	that.handleVideo.call(that, stream);
+		        }, function(error){
+				   console.log("Failed to get a stream due to", error);
+		        });
+		    }
+		} else{
 			var tex = this.extraTex;
 		}
 		this.uniforms1 = {
@@ -82,7 +105,6 @@ var FBObject = function(params){
 			vertexShader: this.vertexShader,
 			fragmentShader: this.fragmentShader1
 		} );
-		console.log(this.material1.uniforms.texture);
 		this.mesh1 = new THREE.Mesh( this.planeGeometry, this.material1 );
 		this.scene1.add( this.mesh1 );
 	}
