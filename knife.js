@@ -36,9 +36,7 @@ function initCanvasScene(){
 		step_w: {type: "f", value: 1/w},
 		step_h: {type: "f", value: 1/h},
 		mouseX: {type: "f", value: 1.0},
-		mouseY: {type: "f", value: 1.0},
-		tv_resolution: {type: "f", value: 640.0},
-		tv_resolution_y: {type: "f", value: 1600.0}
+		mouseY: {type: "f", value: 1.0}
 	}
 
 	FBObject1 = new FBObject({
@@ -56,11 +54,11 @@ function initCanvasScene(){
 	FBObject2 = new FBObject({
 		w: w,
     	h: h, 
-    	x: w/2,
+    	x: 0,
     	texture: "textures/me.jpg",
     	vertexShader: "vs",
-    	fragmentShader1: "blurFrag",
-    	fragmentShader2: "sharpenFrag",
+    	fragmentShader1: "flow2",
+    	fragmentShader2: "flow2",
     	mainScene: canvasScene,
     	extraTex: FBObject1.renderTargets[1]
 	});
@@ -69,6 +67,7 @@ function initCanvasScene(){
 	FBObject1.extraTex = FBObject2.renderTargets[1];
 	FBObject1.addObject(FBObject1.x)
 	// FBObject2.addObject(FBObject2.x)
+	// canvasScene.add(new THREE.Mesh(new THREE.SphereGeometry(50,100,100), new THREE.MeshLambertMaterial({color:0x00ffff})))
     document.addEventListener('mousemove', onDocumentMouseMove, false);
     document.addEventListener('mousedown', onDocumentMouseDown, false);
     window.addEventListener('resize', onWindowResize, false);
@@ -262,7 +261,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("sharpenFrag").textContent
+		fragmentShader: document.getElementById("flow2").textContent
 	});
 	meshFB = new THREE.Mesh(planeGeometry, materialFB);
 	sceneFB.add(meshFB);
