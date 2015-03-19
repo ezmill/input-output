@@ -144,7 +144,7 @@ var FBObject = function(params){
 	this.addObject = function(x){
 		// var geometry = new THREE.BoxGeometry(1000,1000,1000);
 		// var geometry = new THREE.BoxGeometry(1000,1000,1000);
-		var material = new THREE.MeshBasicMaterial({map: this.renderTargets[1]});
+		var material = new THREE.MeshBasicMaterial({map: this.renderTargets[1], side: THREE.DoubleSide});
 		var mesh = new THREE.Mesh(this.planeGeometry, material);
 		mesh.position.set(x,0,0);
 		this.mainScene.add(mesh);

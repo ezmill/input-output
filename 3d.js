@@ -39,11 +39,11 @@ function initCanvasScene(){
     // canvasCamera.rotation.x = Math.PI/2;//test
 
 	cubeTex = THREE.ImageUtils.loadTexture("../img/test.png")
-	// canvasGeometry = new THREE.CubeGeometry(50,50,50);
+	canvasGeometry = new THREE.CubeGeometry(50,50,50);
     // canvasGeometry = new THREE.TorusGeometry( 50, 10, 16, 100 );
 
 
-	canvasMaterial = new THREE.MeshBasicMaterial({color: 0xff0000 });
+	canvasMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, wireframe:false });
 
 	var path = "../img/cube/vince/";
 	var format = '.png';
@@ -58,16 +58,17 @@ function initCanvasScene(){
 	var refractionCube = new THREE.CubeTexture( reflectionCube.image, THREE.CubeRefractionMapping );
 	refractionCube.format = THREE.RGBFormat;
 	var chainMaterial = new THREE.MeshLambertMaterial( { side: THREE.DoubleSide, color: 0xffffff, ambient: 0xaaaaaa, envMap: reflectionCube } )
+	var daggerMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, map: new THREE.ImageUtils.loadTexture("img/dagger.png") } )
 
 
-	loadModel("js/models/hp-chain.js", 0, 0, 0, 0.05, 0, 0, 0, chainMaterial)
+	// loadModel("js/models/dagger.js", 0, 0, 0, 1.0, 0, 0, 0, daggerMaterial)
 
 	canvasLight = new THREE.DirectionalLight(0xffffff, 1.0);
 	canvasLight.position.set(0,0,100);
 	canvasScene.add(canvasLight);
-	// canvasMesh = new THREE.Mesh(canvasGeometry, canvasMaterial);
+	canvasMesh = new THREE.Mesh(canvasGeometry, canvasMaterial);
 	// canvasMesh.position.set(0,h/3 - 50,0);
-	// canvasScene.add(canvasMesh);
+	canvasScene.add(canvasMesh);
 	canvasAnimate();
 	initScene();
 
@@ -77,11 +78,11 @@ function canvasAnimate(){
 
 	// h = ( 360 * ( 1.0 + Date.now()*0.005 ) % 360 ) / 360;
 	// console.log(h);
-	// canvasMaterial.color.setHSL((Math.cos(Date.now()*0.0005)*0.5 + 0.5), 1.0, 0.5 );
+	canvasMaterial.color.setHSL((Math.cos(Date.now()*0.0005)*0.5 + 0.5), 1.0, 0.5 );
 	// canvasMaterial.color = new THREE.Color();
-	// canvasMesh.rotation.x = Date.now()*0.006;
-	// canvasMesh.rotation.y = Date.now()*0.006;
-	// canvasMesh.rotation.z = Date.now()*0.006;
+	canvasMesh.rotation.x = Date.now()*0.006;
+	canvasMesh.rotation.y = Date.now()*0.006;
+	canvasMesh.rotation.z = Date.now()*0.006;
 	// canvasMesh.position.x = (w/2 - 50)*Math.sin(time);
 	// canvasMesh.position.z = (h/3)*Math.cos(time);
 	// canvasMesh.position.y = (h/3)*Math.sin(time);
@@ -185,7 +186,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fs").textContent
+		fragmentShader: document.getElementById("sharpenFrag").textContent
 	});
 	mesh1 = new THREE.Mesh(planeGeometry, material1);
 	mesh1.position.set(0, 0, 0);
@@ -198,10 +199,12 @@ function initFrameDifferencing(){
 			time: { type: 'f' , value: time},
 			resolution: {type: 'v2', value: new THREE.Vector2(w,h)},
 			texture: {type: 't', value: rt1},
-			texture2: {type: 't', value: camTex}
+			texture2: {type: 't', value: camTex},
+			mouseX: globalUniforms.mouseX,
+			mouseY: globalUniforms.mouseY
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fs").textContent
+		fragmentShader: document.getElementById("syrup-fs-2").textContent
 	});
 	mesh2 = new THREE.Mesh(planeGeometry, material2);
 	mesh2.position.set(0, 0, 0);
@@ -230,11 +233,11 @@ function initFrameDifferencing(){
 			time: { type: 'f' , value: time},
 			resolution: {type: 'v2', value: new THREE.Vector2(w,h)},
 			texture: {type: 't', value: rtDiff},
-			mouseX: {type: 'f', value: mouseX},
-			mouseY: {type: 'f', value: mouseY}
+			mouseX: globalUniforms.mouseX,
+			mouseY: globalUniforms.mouseY
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("colorFs").textContent
+		fragmentShader: document.getElementById("blurFrag").textContent
 	});
 	meshFB = new THREE.Mesh(planeGeometry, materialFB);
 	sceneFB.add(meshFB);
@@ -246,11 +249,11 @@ function initFrameDifferencing(){
 			time: { type: 'f' , value: time},
 			resolution: {type: 'v2', value: new THREE.Vector2(w,h)},
 			texture: {type: 't', value: rtFB},
-			mouseX: {type: 'f', value: mouseX},
-			mouseY: {type: 'f', value: mouseY}
+			mouseX: globalUniforms.mouseX,
+			mouseY: globalUniforms.mouseY
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fbFs").textContent
+		fragmentShader: document.getElementById("sharpenFrag").textContent
 	});
 	meshFB2 = new THREE.Mesh(planeGeometry, materialFB2);
 	sceneFB2.add(meshFB2);
@@ -262,11 +265,11 @@ function initFrameDifferencing(){
 			time: { type: 'f' , value: time},
 			resolution: {type: 'v2', value: new THREE.Vector2(w,h)},
 			texture: {type: 't', value: rtFB2},
-			mouseX: {type: 'f', value: mouseX},
-			mouseY: {type: 'f', value: mouseY}
+			mouseX: globalUniforms.mouseX,
+			mouseY: globalUniforms.mouseY
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("blurFrag").textContent
+		fragmentShader: document.getElementById("fs").textContent
 	});
 	meshFB3 = new THREE.Mesh(planeGeometry, materialFB3);
 	sceneFB3.add(meshFB3);
@@ -335,13 +338,18 @@ function map(value,max,minrange,maxrange) {
 function onDocumentMouseMove(event){
 	unMappedMouseX = (event.clientX );
     unMappedMouseY = (event.clientY );
-    mouseX = map(unMappedMouseX, window.innerWidth, -10.0,10.0);
-    mouseY = map(unMappedMouseY, window.innerHeight, -10.0,10.0);
+    mouseX = map(unMappedMouseX, window.innerWidth, -1.0,1.0);
+    mouseY = map(unMappedMouseY, window.innerHeight, -1.0,1.0);
+       // mouseX = 0.03344481605351213;
+    // mouseY = 7.096336499321573;
 
     materialFB2.uniforms.mouseX.value = mouseX;
     material1.uniforms.mouseX.value = mouseX;
     materialFB2.uniforms.mouseY.value = mouseY;
     material1.uniforms.mouseY.value = mouseY;
+
+	globalUniforms.mouseX.value = mouseX;
+    globalUniforms.mouseY.value = mouseY;
 }
 function onKeyDown( event ){
 	if( event.keyCode == "32"){
