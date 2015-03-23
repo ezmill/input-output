@@ -44,7 +44,7 @@ function inputAnimate() {
 
 function inputDraw() {
     //main loop function for input scene
-    inputMaterial.color.setHSL((Math.cos(Date.now() * 0.0005) * 0.5 + 0.5), 1.0, 0.5);
+    inputMaterial.color.setHSL((Math.cos(Date.now() * 0.00005) * 0.5 + 0.5), 1.0, 0.5);
 
     inputMesh.rotation.x = Date.now() * 0.006;
     inputMesh.rotation.y = Date.now() * 0.006;
