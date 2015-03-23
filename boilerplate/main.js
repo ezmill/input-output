@@ -120,13 +120,13 @@ function initFrameDifferencing() {
         mouseX: globalUniforms.mouseX,
         mouseY: globalUniforms.mouseY
     }, "vs", 
-    "sharpenFrag"); //string for fragment shader id - the only lines that really matter in this function, or the only lines you'll wanna change
+    "fs"); //string for fragment shader id - the only lines that really matter in this function, or the only lines you'll wanna change
 
     feedbackObject2 = new feedbackObject({
         time: globalUniforms.time,
         resolution: globalUniforms.resolution,
         texture: { type: 't', value: feedbackObject1.renderTarget }, //use previous feedback object's texture
-        texture2: { type: 't', value: inputTexture },
+        texture2: { type: 't', value: inputTexture }, // p sure this line doesnt do anything lol
         mouseX: globalUniforms.mouseX,
         mouseY: globalUniforms.mouseY
     }, "vs", 
@@ -159,7 +159,7 @@ function initFrameDifferencing() {
         mouseX: globalUniforms.mouseX,
         mouseY: globalUniforms.mouseY
     }, "vs", 
-    "fs"); //this fs is basically post-processing
+    "sharpenFrag"); //this fs is basically post-processing
 
     outputMaterial = new THREE.MeshBasicMaterial({
         map: feedbackObject4.renderTarget
@@ -226,7 +226,7 @@ function onKeyDown(event) {
 
         function screenshot() {
             // var i = renderer.domElement.toDataURL('image/png');
-            var blob = dataURItoBlob(renderer.domElement.toDataURL('image/png'));
+            var blob = dataURItoBlob(outputRenderer.domElement.toDataURL('image/png'));
             var file = window.URL.createObjectURL(blob);
             var img = new Image();
             img.src = file;

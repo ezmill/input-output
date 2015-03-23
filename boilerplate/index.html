@@ -166,7 +166,7 @@ void main(){
   vec4 tex0 = texture2D(texture, vUv);
   vec3 hsv = rgb2hsv(tex0.rgb);
 
-  hsv.r += 0.1;
+  hsv.r += 0.01;
   hsv.r = mod(hsv.r, 1.0);
   hsv.g *= 1.001;
   // hsv.g = mod(hsv.g, 1.0);
