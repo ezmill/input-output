@@ -45,11 +45,11 @@ function initCanvasScene(){
 		w: w,
     	h: h, 
     	x: 0,
-    	texture: "img/rb-strip.jpg",
+    	texture: "img/clouds.jpg",
     	// useVideo:true,
     	vertexShader: "vs",
     	fragmentShader1: "fs",
-    	fragmentShader2: "fs",
+    	fragmentShader2: "flow3",
     	mainScene: canvasScene
 	});
 	FBObject1.uniforms = globalUniforms;
@@ -91,6 +91,10 @@ function canvasAnimate(){
 	time +=0.01;
 
 	globalUniforms.time.value = time;
+
+	// FBObject1.material1.uniforms.texture.value.needsUpdate = true;
+	// FBObject2.material1.uniforms.texture.value.needsUpdate = true;
+
 
     FBObject1.passTex();
     FBObject2.passTex();
@@ -233,7 +237,7 @@ function initFrameDifferencing(){
 			texture2: {type: 't', value: camTex}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("flow2").textContent
+		fragmentShader: document.getElementById("chromaFs").textContent
 	});
 	mesh2 = new THREE.Mesh(planeGeometry, material2);
 	mesh2.position.set(0, 0, 0);
@@ -282,7 +286,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("fs").textContent
+		fragmentShader: document.getElementById("colorFs").textContent
 	});
 	meshFB2 = new THREE.Mesh(planeGeometry, materialFB2);
 	sceneFB2.add(meshFB2);
@@ -298,7 +302,7 @@ function initFrameDifferencing(){
 			mouseY: {type: 'f', value: mouseY}
 		},
 		vertexShader: document.getElementById("vs").textContent,
-		fragmentShader: document.getElementById("sharpenFrag").textContent
+		fragmentShader: document.getElementById("chromaFs").textContent
 	});
 	meshFB3 = new THREE.Mesh(planeGeometry, materialFB3);
 	sceneFB3.add(meshFB3);
