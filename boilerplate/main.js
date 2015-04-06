@@ -14,8 +14,8 @@ initInputScene();
 
 function initInputScene() {
     //input scene - basic three.js setup and loop functionality
-    inputCamera = new THREE.PerspectiveCamera(50, w / h, 1, 100000);
-    inputCamera.position.set(0, 0, 400);
+    inputCamera = new THREE.PerspectiveCamera(45, w / h, 1, 100000);
+    inputCamera.position.set(0, 0, 2000);
 
     //orbit controls for input scene - make sure only input or output scene has controls, not both
     inputControls = new THREE.OrbitControls(inputCamera);
@@ -23,14 +23,29 @@ function initInputScene() {
     inputRenderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true});
     inputRenderer.setSize(w, h);
     inputRenderer.setClearColor(0xffffff, 1);
+    inputRenderer.setBlending(THREE.CustomBlending, THREE.SubtractEquation, THREE.DstColorFactor, THREE.SrcColorFactor);
 
     inputScene = new THREE.Scene();
 
-    inputGeometry = new THREE.CubeGeometry(50, 50, 50);
-    inputMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
-    inputMesh = new THREE.Mesh(inputGeometry, inputMaterial);
-    inputScene.add(inputMesh);
+    // inputGeometry = new THREE.CubeGeometry(75, 75, 75);
 
+    // inputMaterial2 = new THREE.MeshBasicMaterial({color: 0xffffff});
+    var path = "../img/cube/vince/";
+    var format = '.png';
+    var urls = [
+            path + 'px' + format, path + 'nx' + format,
+            path + 'py' + format, path + 'ny' + format,
+            path + 'pz' + format, path + 'nz' + format
+    ];
+    var reflectionCube = THREE.ImageUtils.loadTextureCube( urls );
+    reflectionCube.format = THREE.RGBFormat;
+
+    var refractionCube = new THREE.CubeTexture( reflectionCube.image, THREE.CubeRefractionMapping );
+    refractionCube.format = THREE.RGBFormat;
+    inputMaterial = new THREE.MeshLambertMaterial( { side: THREE.DoubleSide, color: 0x000000, ambient: 0xaaaaaa, envMap: reflectionCube, combine: THREE.AddOperation } )
+    // inputMesh = new THREE.Mesh(inputGeometry, inputMaterial2);
+    // inputScene.add(inputMesh);
+    loadModel("../js/models/2chain2.js", 0,0,0,1.0,0,0,0, inputMaterial);
     inputAnimate();
 
     //takes input scene and makes it a texture, as well as starting feedback loop
@@ -44,11 +59,13 @@ function inputAnimate() {
 
 function inputDraw() {
     //main loop function for input scene
-    inputMaterial.color.setHSL((Math.cos(Date.now() * 0.00005) * 0.5 + 0.5), 1.0, 0.5);
-
-    inputMesh.rotation.x = Date.now() * 0.006;
-    inputMesh.rotation.y = Date.now() * 0.006;
-    inputMesh.rotation.z = Date.now() * 0.006;
+    // inputMaterial.color.setHSL((Math.cos(Date.now() * 0.0005) * 0.5 + 0.5), 1.0, 0.5);
+    // inputCamera.lookAt(inputScene.position);
+    // inputCamera.rotation.y = Date.now()*0.0005;
+    // inputMesh.rotation.x = Date.now() * 0.006;
+    // inputMesh.rotation.y = Date.now() * 0.006;
+    // inputMesh.rotation.z = Date.now() * 0.006;
+    // inputMesh.position.x += Math.cos(Date.now()*0.005)*100;
 
     inputRenderer.render(inputScene, inputCamera);
 }
@@ -64,6 +81,7 @@ function initOutputScene() {
     outputRenderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true});
     outputRenderer.setSize(w, h);
     outputRenderer.setClearColor(0xffffff, 1);
+    outputRenderer.setBlending(THREE.CustomBlending, THREE.SubtractEquation, THREE.DstColorFactor, THREE.SrcColorFactor);
 
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -120,7 +138,7 @@ function initFrameDifferencing() {
         mouseX: globalUniforms.mouseX,
         mouseY: globalUniforms.mouseY
     }, "vs", 
-    "fs"); //string for fragment shader id - the only lines that really matter in this function, or the only lines you'll wanna change
+    "colorFs"); //string for fragment shader id - the only lines that really matter in this function, or the only lines you'll wanna change
 
     feedbackObject2 = new feedbackObject({
         time: globalUniforms.time,
@@ -130,7 +148,7 @@ function initFrameDifferencing() {
         mouseX: globalUniforms.mouseX,
         mouseY: globalUniforms.mouseY
     }, "vs", 
-    "blurFrag"); //these first three/four fragment shader object things are where most of the feedback loop is happening
+    "flowFs"); //these first three/four fragment shader object things are where most of the feedback loop is happening
 
     frameDifferencer = new feedbackObject({
         time: globalUniforms.time,
@@ -150,7 +168,7 @@ function initFrameDifferencing() {
         mouseX: globalUniforms.mouseX,
         mouseY: globalUniforms.mouseY
     }, "vs", 
-    "colorFs"); //this fs also contributes to feedback loop
+    "blurFrag"); //this fs also contributes to feedback loop
 
     feedbackObject4 = new feedbackObject({
         time: globalUniforms.time,
@@ -161,11 +179,15 @@ function initFrameDifferencing() {
     }, "vs", 
     "sharpenFrag"); //this fs is basically post-processing
 
+    feedbackObject1.material.uniforms.texture.value = frameDifferencer.renderTarget; //previous frame as input
+
     outputMaterial = new THREE.MeshBasicMaterial({
         map: feedbackObject4.renderTarget
     });
     outputMesh = new THREE.Mesh(planeGeometry, outputMaterial);
     outputScene.add(outputMesh);
+
+
 
 }
 
@@ -180,9 +202,8 @@ function outputDraw() {
     inputDraw();
     inputTexture.needsUpdate = true;
 
-    // expand(1.01); - similar to translateVs
+    // expand(1.01);// - similar to translateVs
 
-    feedbackObject1.material.uniforms.texture.value = frameDifferencer.renderTarget; //previous frame as input
 
     //render all the render targets to their respective scenes
     outputRenderer.render(feedbackObject2.scene, outputCameraRTT, feedbackObject2.renderTarget, true);
@@ -199,6 +220,7 @@ function outputDraw() {
     var a = feedbackObject3.renderTarget;
     feedbackObject3.renderTarget = feedbackObject1.renderTarget;
     feedbackObject1.renderTarget = a;
+
 
 }
 
@@ -225,20 +247,15 @@ function onKeyDown(event) {
         screenshot();
 
         function screenshot() {
-            // var i = renderer.domElement.toDataURL('image/png');
             var blob = dataURItoBlob(outputRenderer.domElement.toDataURL('image/png'));
             var file = window.URL.createObjectURL(blob);
             var img = new Image();
             img.src = file;
             img.onload = function(e) {
-                // window.URL.revokeObjectURL(this.src);
                 window.open(this.src);
-
             }
-            // window.open(i)
-            // insertAfter(img, );
         }
-        //
+
         function dataURItoBlob(dataURI) {
             // convert base64/URLEncoded data component to raw binary data held in a string
             var byteString;
@@ -265,4 +282,20 @@ function onKeyDown(event) {
             referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
         }
     }
+}
+function createModel(geometry, x, y, z, scale, rotX, rotY, rotZ, customMaterial){
+        var material = customMaterial
+        inputMesh = new THREE.Mesh(geometry, material);
+        var scale = scale;
+        inputMesh.position.set(x,y,z);
+        inputMesh.scale.set(scale,scale,scale);
+        inputMesh.rotation.set(rotX, rotY, rotZ);
+        inputScene.add(inputMesh);
+    }
+
+function loadModel(model, x, y, z, scale, rotX, rotY, rotZ, customMaterial){
+    var loader = new THREE.BinaryLoader(true);
+    loader.load(model, function(geometry){
+        createModel(geometry, x, y, z, scale, rotX, rotY, rotZ, customMaterial);
+    })
 }
